@@ -7,6 +7,7 @@ export enum TokenType{
 
     OpenParen, CloseParen,
     BinaryOperator,
+    EOF, //The end of file token
 }
 
 const KEYWORDS: Record<string, TokenType> = {
@@ -24,7 +25,7 @@ function token (value = "", type: TokenType) : Token{
 }
 
 function isalpha (src: string) {
-    return src.toUpperCase != src.toLowerCase;
+    return src.toUpperCase() != src.toLowerCase();
 }
 
 function isnum( src: string){
@@ -87,6 +88,7 @@ export function tokenize( sourceCode: string) : Token[]{
         //Build token until source code is empty (end of file)
     }
 
+    tokens.push({type: TokenType.EOF, value: "EOF"});
     return tokens;
 }
 
