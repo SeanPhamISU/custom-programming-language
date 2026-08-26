@@ -1,5 +1,6 @@
 //Define a token interface - What a token is
 export enum TokenType{
+    Null,
     Let,
     Ident,
     Equal, //Can be group with not equal, less than, greater than, ... as binary comparator
@@ -12,6 +13,7 @@ export enum TokenType{
 
 const KEYWORDS: Record<string, TokenType> = {
     "let": TokenType.Let,
+    "null": TokenType.Null,
 }
 
 
@@ -92,7 +94,7 @@ export function tokenize( sourceCode: string) : Token[]{
     return tokens;
 }
 
-const source = await Deno.readTextFile("./test.txt");
-for(const token of tokenize(source)){
-    console.log(token);
-}
+// const source = await Deno.readTextFile("./test.txt");
+// for(const token of tokenize(source)){
+//     console.log(token);
+// }
