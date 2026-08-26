@@ -1,5 +1,5 @@
 import { ValueTypes, RuntimeVal, NumberVal, NullVal } from "./value.ts";
-import { BinaryExpr, Identifier, NodeType, NumericLiteral, Stmt } from "../frontend/ast.ts";
+import { BinaryExpr, Identifier, NodeType, NumericLiteral, Stmt, VarDeclaration } from "../frontend/ast.ts";
 import Environment from "./environment.ts";
 
 function evaluateBinaryExpr ( binop : BinaryExpr, env : Environment) : RuntimeVal {
@@ -37,10 +37,17 @@ function evaluateIdentifier( ident : Identifier, env: Environment) : RuntimeVal 
     return val;
 }
 
+function evaluateVarDeclaration(declaration :VarDeclaration, env: Environment) : RuntimeVal{
+    const value = declaration.value ? evaluate(declaration.value, env) : {value: "null", type: "null"} as NullVal;
+    env.declareVar(declaration.identifier, value);
+}
+
 export function evaluate(astNode: Stmt, env : Environment) : RuntimeVal{
     switch (astNode.kind) {
         case "NumericLiteral":
             return { value: (astNode as NumericLiteral).value, type: "number" } as NumberVal;
+        case "VarDeclaration":
+            return evaluateVarDeclaration(astNode as VarDeclaration, env);
         case "NullLiteral":
             return {value: "null", type: "null"} as NullVal;
         case "BinaryExpr":

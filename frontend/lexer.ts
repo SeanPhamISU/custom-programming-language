@@ -3,7 +3,8 @@ export enum TokenType{
     Null,
     Let,
     Ident,
-    Equal, //Can be group with not equal, less than, greater than, ... as binary comparator
+    Equal,
+    SemiColon,
     Number,
 
     OpenParen, CloseParen,
@@ -57,6 +58,9 @@ export function tokenize( sourceCode: string) : Token[]{
         }
         else if (src[0] == "="){
             tokens.push(token(src.shift(), TokenType.Equal));
+        }
+        else if (src[0] == ";"){
+            tokens.push(token(src.shift(), TokenType.SemiColon));
         }
         else {
             //Multicharacter tokesn (variables, <=, etc)

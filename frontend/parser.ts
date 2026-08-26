@@ -1,4 +1,4 @@
-import { Stmt, Program, Expr, BinaryExpr, Identifier, NumericLiteral, NullLiteral} from "../frontend/ast.ts";
+import { Stmt, Program, Expr, BinaryExpr, Identifier, NumericLiteral, NullLiteral, VarDeclaration} from "../frontend/ast.ts";
 import { tokenize, Token, TokenType } from "../frontend/lexer.ts";
 
 export default class Parser {
@@ -24,9 +24,36 @@ export default class Parser {
     }
     private parseStmt() : Stmt {
         //return stmt;
+        switch( this.at().type ){
+            case TokenType.Let:
+                return this.parseVarDeclaration();
+            default:
+                return this.parseExpr();
+        }
 
         //skip to parse expressions for nows
         return this.parseExpr();
+    }
+    private parseVarDeclaration() : Stmt{
+        this.pop();
+        const identifier = this.expectedPop(TokenType.Ident).value;
+        // if(this.at().type == TokenType.SemiColon){
+
+        // }
+        if(this.at().type == TokenType.Equal){
+            console.log("Hm");
+            this.pop();
+            const expr = this.parseExpr();
+            if(expr.kind !=  "NumericLiteral" && expr.kind != "NullLiteral"){
+                console.log(`Expression kind ${expr.kind} is currently not supported`);
+                Deno.exit(1);
+            }
+            return {kind: "VarDeclaration", constant: false, identifier: identifier, value: expr} as VarDeclaration; 
+        }
+        else{
+            console.error("Variable is not defined");
+            Deno.exit(0);
+        }
     }
     private parseExpr() : Expr {
         return this.parseAdditiveExpr();

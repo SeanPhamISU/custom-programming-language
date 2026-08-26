@@ -4,6 +4,10 @@ export interface RuntimeVal {
     type: ValueTypes;
 }
 
+export interface BooleanVal extends RuntimeVal {
+    type: "boolean",
+    value: boolean,
+}
 export interface NullVal extends RuntimeVal {
     type: "null";
     value: "null";
