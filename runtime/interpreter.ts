@@ -1,5 +1,5 @@
 import { ValueTypes, RuntimeVal, NumberVal, NullVal } from "./value.ts";
-import { BinaryExpr, Identifier, NodeType, NumericLiteral, Stmt, VarDeclaration } from "../frontend/ast.ts";
+import { AssignmentExpr, BinaryExpr, Identifier, NodeType, NumericLiteral, Stmt, VarDeclaration } from "../frontend/ast.ts";
 import Environment from "./environment.ts";
 
 function evaluateBinaryExpr ( binop : BinaryExpr, env : Environment) : RuntimeVal {
@@ -39,7 +39,15 @@ function evaluateIdentifier( ident : Identifier, env: Environment) : RuntimeVal 
 
 function evaluateVarDeclaration(declaration :VarDeclaration, env: Environment) : RuntimeVal{
     const value = declaration.value ? evaluate(declaration.value, env) : {value: "null", type: "null"} as NullVal;
-    env.declareVar(declaration.identifier, value);
+    return env.declareVar(declaration.identifier, value);
+}
+
+function evaluateAssignmentExpr( assignmentExpr : AssignmentExpr, env: Environment) : RuntimeVal{
+    if( assignmentExpr.assigne.kind != "Identifier"){
+        console.error( `Invalid assigne`);
+    }
+    const value = assignmentExpr.value ? evaluate(assignmentExpr.value, env) : {value: "null", type: "null"} as NullVal;
+    return env.assignVar( (assignmentExpr.assigne as Identifier).symbol, value);
 }
 
 export function evaluate(astNode: Stmt, env : Environment) : RuntimeVal{
@@ -56,6 +64,8 @@ export function evaluate(astNode: Stmt, env : Environment) : RuntimeVal{
             return evaluateProgram( astNode as Program, env );
         case "Identifier":
             return evaluateIdentifier( astNode as Identifier, env);
+        case "AssignmentExpr":
+            return evaluateAssignmentExpr( astNode as AssignmentExpr, env);
         default:
             console.error("This AST Node has not yet been setup for interpretation: ", astNode);
             Deno.exit(0); 

@@ -95,6 +95,7 @@ export function tokenize( sourceCode: string) : Token[]{
     }
 
     tokens.push({type: TokenType.EOF, value: "EOF"});
+    // console.log(tokens);
     return tokens;
 }
 

@@ -1,4 +1,4 @@
-import { Stmt, Program, Expr, BinaryExpr, Identifier, NumericLiteral, NullLiteral, VarDeclaration} from "../frontend/ast.ts";
+import { Stmt, Program, Expr, BinaryExpr, Identifier, NumericLiteral, NullLiteral, VarDeclaration, AssignmentExpr} from "../frontend/ast.ts";
 import { tokenize, Token, TokenType } from "../frontend/lexer.ts";
 
 export default class Parser {
@@ -16,8 +16,9 @@ export default class Parser {
     }
     private expectedPop(expectedToken : TokenType){
         const prev = this.pop();
+        console.log(prev);
         if( !prev || prev.type != expectedToken ){
-            console.error("Program expects token type: ", expectedToken);
+            console.error(`Program expects token type: ${expectedToken}. Found type ${prev.type}`);
             Deno.exit(1);
         }
         return prev;
@@ -38,16 +39,11 @@ export default class Parser {
         this.pop();
         const identifier = this.expectedPop(TokenType.Ident).value;
         // if(this.at().type == TokenType.SemiColon){
-
         // }
         if(this.at().type == TokenType.Equal){
-            console.log("Hm");
             this.pop();
             const expr = this.parseExpr();
-            if(expr.kind !=  "NumericLiteral" && expr.kind != "NullLiteral"){
-                console.log(`Expression kind ${expr.kind} is currently not supported`);
-                Deno.exit(1);
-            }
+            console.log("Declared successfully");
             return {kind: "VarDeclaration", constant: false, identifier: identifier, value: expr} as VarDeclaration; 
         }
         else{
@@ -56,7 +52,7 @@ export default class Parser {
         }
     }
     private parseExpr() : Expr {
-        return this.parseAdditiveExpr();
+        return this.parseAssignmentExpr();
     }
 
     // Orders of Prescidence
@@ -64,6 +60,16 @@ export default class Parser {
     // Multiplicative
     // Unary
     // Primary (highest)
+
+    private parseAssignmentExpr() : Expr {
+        const left = this.parseAdditiveExpr(); //swtich this out with objectExpr
+        if(this.at().type == TokenType.Equal){
+            this.pop();
+            const value = this.parseAssignmentExpr(); // allows chaining (e.g: a = b = c = 4)
+            return { value: value, assigne: left, kind: "AssignmentExpr"} as AssignmentExpr;
+        }
+        return left;
+    }
     private parseAdditiveExpr() : Expr {
         let left = this.parseMultiplicativeExpr();
 

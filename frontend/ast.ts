@@ -4,6 +4,7 @@ export type NodeType =
 | "VarDeclaration"
 
 // EXPRESSIONS
+| "AssignmentExpr"
 | "NumericLiteral" 
 | "NullLiteral"
 | "Identifier" 
@@ -55,4 +56,10 @@ export interface NumericLiteral extends Expr {
 export interface NullLiteral extends Expr {
     kind: "NullLiteral";
     value: "null";
+}
+
+export interface AssignmentExpr extends Expr {
+    kind: "AssignmentExpr";
+    assigne: Expr,
+    value: Expr,
 }
