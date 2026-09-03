@@ -60,15 +60,42 @@ export default class Parser {
     // Multiplicative
     // Unary
     // Primary (highest)
-
+    
     private parseAssignmentExpr() : Expr {
-        const left = this.parseAdditiveExpr(); //swtich this out with objectExpr
+        const left = this.parseObjectExpr(); //swtich this out with objectExpr
         if(this.at().type == TokenType.Equal){
             this.pop();
             const value = this.parseAssignmentExpr(); // allows chaining (e.g: a = b = c = 4)
             return { value: value, assigne: left, kind: "AssignmentExpr"} as AssignmentExpr;
         }
         return left;
+    }
+    private parseObjectExpr() : Expr {
+        if(this.at().type != TokenType.OpenBrace)
+            return this.parseAdditiveExpr();
+        this.pop(); // Opening Brace
+        const properties = new Array<PropertyLiteral>();
+        while(this.notEOF() && this.at().type != TokenType.CloseBrace){
+            const key = this.expectedPop(TokenType.Ident).value;
+
+            if(this.at().type == TokenType.Comma){
+                this.pop();
+                properties.push({kind: "PropertyLiteral", key: key} as PropertyLiteral);
+                continue;
+            }
+            else if(this.at().type == TokenType.CloseBrace){
+                properties.push({kind: "PropertyLiteral", key: key} as PropertyLiteral);
+                break;
+            }
+            this.expectedPop(TokenType.Colon);
+            const value = this.parseExpr();
+            properties.push({kind: "PropertyLiteral", key: key, value: value} as PropertyLiteral);
+            if(this.at().type != TokenType.CloseBrace){
+                this.expectedPop(TokenType.Comma);
+            }
+        }
+        this.expectedPop(TokenType.CloseBrace); // Closing Brace
+        return {kind: "ObjectLiteral", properties: properties} as ObjectLiteral;
     }
     private parseAdditiveExpr() : Expr {
         let left = this.parseMultiplicativeExpr();

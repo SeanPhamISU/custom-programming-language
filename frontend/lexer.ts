@@ -4,10 +4,13 @@ export enum TokenType{
     Let,
     Ident,
     Equal,
+    Colon,
     SemiColon,
+    Comma,
     Number,
 
     OpenParen, CloseParen,
+    OpenBrace, CloseBrace,
     BinaryOperator,
     EOF, //The end of file token
 }
@@ -61,6 +64,18 @@ export function tokenize( sourceCode: string) : Token[]{
         }
         else if (src[0] == ";"){
             tokens.push(token(src.shift(), TokenType.SemiColon));
+        }
+        else if (src[0] == ":"){
+            tokens.push(token(src.shift(), TokenType.Colon));
+        }
+        else if (src[0] == ","){
+            tokens.push(token(src.shift(), TokenType.Comma));
+        }
+        else if (src[0] == "{"){
+            tokens.push(token(src.shift(), TokenType.OpenBrace));
+        }
+        else if (src[0] == "}"){
+            tokens.push(token(src.shift(), TokenType.CloseBrace));
         }
         else {
             //Multicharacter tokesn (variables, <=, etc)

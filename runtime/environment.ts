@@ -1,11 +1,20 @@
-import {RuntimeVal} from "./value.ts";
+import {BooleanVal, RuntimeVal, NullVal} from "./value.ts";
 
+export function createGlobalEnvironment(){
+    const env = new Environment();
+    env.declareVar("true", {value: true, type: "boolean"} as BooleanVal);
+    env.declareVar("false", {value: false, type: "boolean"} as BooleanVal);
+    env.declareVar("null", {value: "null", type: "null"} as NullVal);
+
+    return env;
+}
 export default class Environment {
     private parent?: Environment;
     private variables: Map<string, RuntimeVal>;
 
-    constructor(parentEnv?: Environment){
-        this.parent = parentEnv;
+    constructor(parentENV?: Environment){
+        const global = parentENV ? true : false;
+        this.parent = parentENV;
         this.variables = new Map();
     }
 

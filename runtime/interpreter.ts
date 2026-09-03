@@ -1,5 +1,5 @@
-import { ValueTypes, RuntimeVal, NumberVal, NullVal } from "./value.ts";
-import { AssignmentExpr, BinaryExpr, Identifier, NodeType, NumericLiteral, Stmt, VarDeclaration } from "../frontend/ast.ts";
+import { ValueTypes, RuntimeVal, NumberVal, NullVal, ObjectVal } from "./value.ts";
+import { AssignmentExpr, BinaryExpr, Identifier, NodeType, NumericLiteral, ObjectLiteral, Program, Stmt, VarDeclaration } from "../frontend/ast.ts";
 import Environment from "./environment.ts";
 
 function evaluateBinaryExpr ( binop : BinaryExpr, env : Environment) : RuntimeVal {
@@ -50,6 +50,16 @@ function evaluateAssignmentExpr( assignmentExpr : AssignmentExpr, env: Environme
     return env.assignVar( (assignmentExpr.assigne as Identifier).symbol, value);
 }
 
+function evaluateObjectLiteral( object: ObjectLiteral, env: Environment) : RuntimeVal
+{
+    const objMap = new Map<string, RuntimeVal>();
+    for(const {key, value} of object.properties){
+        const runtimeVal = (value == undefined) ? env.getVar(key) : evaluate(value, env);
+        objMap.set(key, runtimeVal);
+    }   
+    return {type: "object", value: objMap} as ObjectVal;
+}
+
 export function evaluate(astNode: Stmt, env : Environment) : RuntimeVal{
     switch (astNode.kind) {
         case "NumericLiteral":
@@ -58,6 +68,8 @@ export function evaluate(astNode: Stmt, env : Environment) : RuntimeVal{
             return evaluateVarDeclaration(astNode as VarDeclaration, env);
         case "NullLiteral":
             return {value: "null", type: "null"} as NullVal;
+        case "ObjectLiteral":
+            return evaluateObjectLiteral(astNode as ObjectLiteral, env);
         case "BinaryExpr":
             return evaluateBinaryExpr(astNode as BinaryExpr, env);
         case "Program":

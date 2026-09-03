@@ -5,13 +5,18 @@ export type NodeType =
 
 // EXPRESSIONS
 | "AssignmentExpr"
-| "NumericLiteral" 
-| "NullLiteral"
 | "Identifier" 
 | "BinaryExpr" 
 | "CallExpr" 
 | "UnaryExpr" 
-| "FunctionDeclaration";
+| "FunctionDeclaration"
+
+// LITERALS
+| "NumericLiteral" 
+| "NullLiteral"
+| "ObjectLiteral"
+| "PropertyLiteral";
+
 
 // Statements don't return a value (e.g: x = 45)
 // Expressions return a value (e.g: 45 + 10)
@@ -62,4 +67,15 @@ export interface AssignmentExpr extends Expr {
     kind: "AssignmentExpr";
     assigne: Expr,
     value: Expr,
+}
+
+export interface ObjectLiteral extends Expr {
+    kind: "ObjectLiteral";
+    properties: PropertyLiteral[];
+}
+
+export interface PropertyLiteral extends Expr {
+    kind: "PropertyLiteral";
+    key: string;
+    value?: Expr;
 }

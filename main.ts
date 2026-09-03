@@ -7,10 +7,7 @@ repl();
 
 async function repl () {
     const parser = new Parser();
-    const env = new Environment();
-    env.declareVar("true", {value: true, type: "boolean"} as BooleanVal);
-    env.declareVar("false", {value: false, type: "boolean" as BooleanVal});
-    env.declareVar("null", {value: "null", type: "null"} as NullVal);
+    const env = createGlobalEnvironment();
     console.log("Test Test");
     while (true) {
         const input = prompt("> ");
