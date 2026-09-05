@@ -1,4 +1,4 @@
-import { ValueTypes, RuntimeVal, NumberVal, NullVal, ObjectVal } from "./value.ts";
+import { ValueTypes, RuntimeVal, NumberVal, NullVal, ObjectVal, NativeFunctionVal } from "./value.ts";
 import { AssignmentExpr, BinaryExpr, Identifier, NodeType, NumericLiteral, ObjectLiteral, Program, Stmt, VarDeclaration } from "../frontend/ast.ts";
 import Environment from "./environment.ts";
 
@@ -60,6 +60,17 @@ function evaluateObjectLiteral( object: ObjectLiteral, env: Environment) : Runti
     return {type: "object", value: objMap} as ObjectVal;
 }
 
+function evaluateCallExpr(callExpr: CallExpr, env: Environment): RuntimeVal {
+    const args = callExpr.arguments.map((arg) => evaluate(arg, env));
+    const func = evaluate(callExpr.caller, env);
+    if( func.type != "native-function"){
+        throw `Cannot call non-function value of type ${func.type}`;
+    }
+
+    let result = (func as NativeFunctionVal).call(args, env);
+    return result;
+}
+
 export function evaluate(astNode: Stmt, env : Environment) : RuntimeVal{
     switch (astNode.kind) {
         case "NumericLiteral":
@@ -76,6 +87,8 @@ export function evaluate(astNode: Stmt, env : Environment) : RuntimeVal{
             return evaluateProgram( astNode as Program, env );
         case "Identifier":
             return evaluateIdentifier( astNode as Identifier, env);
+        case "CallExpr":
+            return evaluateCallExpr(astNode as CallExpr, env);
         case "AssignmentExpr":
             return evaluateAssignmentExpr( astNode as AssignmentExpr, env);
         default:

@@ -1,10 +1,16 @@
-import {BooleanVal, RuntimeVal, NullVal} from "./value.ts";
+import {BooleanVal, RuntimeVal, NullVal, HK_NATIVE_FN} from "./value.ts";
 
 export function createGlobalEnvironment(){
     const env = new Environment();
     env.declareVar("true", {value: true, type: "boolean"} as BooleanVal);
     env.declareVar("false", {value: false, type: "boolean"} as BooleanVal);
     env.declareVar("null", {value: "null", type: "null"} as NullVal);
+
+    // Define a native built-in function
+    env.declareVar("print", HK_NATIVE_FN((args, scope) => {
+        console.log(...args);
+        return {type: "null", value: "null"} as NullVal;
+    }));
 
     return env;
 }

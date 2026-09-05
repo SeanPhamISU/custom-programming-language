@@ -1,4 +1,4 @@
-import { Stmt, Program, Expr, BinaryExpr, Identifier, NumericLiteral, NullLiteral, VarDeclaration, AssignmentExpr} from "../frontend/ast.ts";
+import { Stmt, Program, Expr, BinaryExpr, Identifier, NumericLiteral, NullLiteral, VarDeclaration, AssignmentExpr, CallExpr} from "../frontend/ast.ts";
 import { tokenize, Token, TokenType } from "../frontend/lexer.ts";
 
 export default class Parser {
@@ -56,8 +56,12 @@ export default class Parser {
     }
 
     // Orders of Prescidence
+    // Assignment
+    // Object
     // Additive
     // Multiplicative
+    // Call
+    // Member
     // Unary
     // Primary (highest)
     
@@ -114,11 +118,11 @@ export default class Parser {
         return left;
     }
     private parseMultiplicativeExpr() : Expr {
-        let left = this.parsePrimaryExpr();
+        let left = this.parseCallMemberExpr();
 
         while (this.at().value == "*" || this.at().value == "/"){
             const operator = this.pop().value;
-            const right = this.parsePrimaryExpr();
+            const right = this.parseCallMemberExpr();
 
             left =  {
                 kind: "BinaryExpr",
@@ -129,6 +133,65 @@ export default class Parser {
         }
         return left;
     }
+
+    private parseCallMemberExpr() : Expr {
+        const member = this.parseMemberExpr();
+
+        if(this.at().type == TokenType.OpenParen){
+            return this.parseCallExpr(member);
+        }
+        return member;
+    }
+    private parseCallExpr(caller: Expr) : Expr {
+        let callExpr: Expr = { kind: "CallExpr", caller, arguments: this.parseArgs()} as CallExpr;
+
+        if( this.at().type == TokenType.OpenParen ){
+            callExpr = this.parseCallExpr(callExpr);
+        }
+        return callExpr;
+    }
+
+    private parseArgs() : Expr[] {
+        this.expectedPop(TokenType.OpenParen);
+        const args = this.at().type == TokenType.CloseParen ? [] : this.parseArgsList();
+
+        this.expectedPop(TokenType.CloseParen);
+        return args;
+    }
+    private parseArgsList() : Expr[] {
+        const args = [this.parseExpr()];
+        while (this.notEOF() && this.at().type == TokenType.Comma){
+            this.pop();
+            args.push(this.parseExpr());
+        }
+        return args;
+    }
+    private parseMemberExpr() : Expr {
+        let object = this.parsePrimaryExpr();   
+        while( this.at().type == TokenType.Dot || this.at().type == TokenType.OpenBracket){
+            const operator = this.pop();
+            let property: Expr;
+            let computed: boolean;
+
+            //non-computed values aka obj.expr
+            if( operator.type == TokenType.Dot ){
+                property = this.parsePrimaryExpr();
+                computed = false;
+
+                if(property.kind != "Identifier"){
+                    throw `Cannot use dot operator without right hand side being a Identifier`;
+                }
+            }
+            else if( operator.type == TokenType.OpenBracket ){
+                property = this.parseExpr();
+                computed = true;
+                this.expectedPop(TokenType.CloseBracket);
+            }
+            object = { kind: "MemberExpr", object, property, computed } as MemberExpr;
+        }
+        return object;
+    }
+
 
     private parsePrimaryExpr() : Expr{
         

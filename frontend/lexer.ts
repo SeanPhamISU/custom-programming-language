@@ -7,10 +7,12 @@ export enum TokenType{
     Colon,
     SemiColon,
     Comma,
+    Dot,
     Number,
 
     OpenParen, CloseParen,
     OpenBrace, CloseBrace,
+    OpenBracket, CloseBracket,
     BinaryOperator,
     EOF, //The end of file token
 }
@@ -71,11 +73,20 @@ export function tokenize( sourceCode: string) : Token[]{
         else if (src[0] == ","){
             tokens.push(token(src.shift(), TokenType.Comma));
         }
+        else if (src[0] == "."){
+            tokens.push(token(src.shift(), TokenType.Dot));
+        }
         else if (src[0] == "{"){
             tokens.push(token(src.shift(), TokenType.OpenBrace));
         }
         else if (src[0] == "}"){
             tokens.push(token(src.shift(), TokenType.CloseBrace));
+        }
+        else if (src[0] == "["){
+            tokens.push(token(src.shift(), TokenType.OpenBracket));
+        }
+        else if (src[0] == "]"){
+            tokens.push(token(src.shift(), TokenType.CloseBracket));
         }
         else {
             //Multicharacter tokesn (variables, <=, etc)

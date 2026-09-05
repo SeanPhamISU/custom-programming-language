@@ -1,5 +1,5 @@
 import Parser from "./frontend/parser.ts";
-import Environment from "./runtime/environment.ts";
+import Environment, { createGlobalEnvironment } from "./runtime/environment.ts";
 import { evaluate } from "./runtime/interpreter.ts";
 import { NumberVal, NullVal, BooleanVal } from "./runtime/value.ts";
 

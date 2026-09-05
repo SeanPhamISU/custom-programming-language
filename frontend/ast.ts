@@ -10,6 +10,8 @@ export type NodeType =
 | "CallExpr" 
 | "UnaryExpr" 
 | "FunctionDeclaration"
+| "CallExpr"
+| "MemberExpr"
 
 // LITERALS
 | "NumericLiteral" 
@@ -69,6 +71,12 @@ export interface AssignmentExpr extends Expr {
     value: Expr,
 }
 
+export interface CallExpr extends Expr {
+    kind: "CallExpr";
+    caller: Expr;
+    arguments: Expr[];
+}
+
 export interface ObjectLiteral extends Expr {
     kind: "ObjectLiteral";
     properties: PropertyLiteral[];
@@ -78,4 +86,11 @@ export interface PropertyLiteral extends Expr {
     kind: "PropertyLiteral";
     key: string;
     value?: Expr;
+}
+
+export interface MemberExpr extends Expr {
+    kind: "MemberExpr";
+    object: Expr;
+    property: Expr;
+    computed: boolean;
 }
